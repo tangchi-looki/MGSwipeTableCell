@@ -733,8 +733,8 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
 -(void) fixRegionAndAccesoryViews
 {
     //Fix right to left layout direction for arabic and hebrew languagues
-    if (self.bounds.size.width != self.contentView.bounds.size.width && [self isRTLLocale]) {
-        _swipeOverlay.frame = CGRectMake(-self.bounds.size.width + self.contentView.bounds.size.width, 0, _swipeOverlay.bounds.size.width, _swipeOverlay.bounds.size.height);
+    if (self.swipeOverlayContainerView.bounds.size.width != self.swipeOverlayContainerView.bounds.size.width && [self isRTLLocale]) {
+        _swipeOverlay.frame = CGRectMake(-self.swipeOverlayContainerView.bounds.size.width + self.swipeOverlayContainerView.bounds.size.width, 0, _swipeOverlay.bounds.size.width, _swipeOverlay.bounds.size.height);
     }
 }
 
@@ -754,11 +754,11 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
 -(UIView *) swipeContentView
 {
     if (!_swipeContentView) {
-        _swipeContentView = [[UIView alloc] initWithFrame:self.contentView.bounds];
+        _swipeContentView = [[UIView alloc] initWithFrame:self.swipeOverlayContainerView.bounds];
         _swipeContentView.backgroundColor = [UIColor clearColor];
         _swipeContentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _swipeContentView.layer.zPosition = 9;
-        [self.contentView addSubview:_swipeContentView];
+        [self.swipeOverlayContainerView addSubview:_swipeContentView];
     }
     return _swipeContentView;
 }
@@ -767,11 +767,11 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
 {
     [super layoutSubviews];
     if (_swipeContentView) {
-        _swipeContentView.frame = self.contentView.bounds;
+        _swipeContentView.frame = self.swipeOverlayContainerView.bounds;
     }
     if (_swipeOverlay) {
         CGSize prevSize = _swipeView.bounds.size;
-        _swipeOverlay.frame = CGRectMake(0, 0, self.bounds.size.width, self.contentView.bounds.size.height);
+        _swipeOverlay.frame = CGRectMake(0, 0, self.swipeOverlayContainerView.bounds.size.width, self.swipeOverlayContainerView.bounds.size.height);
         [self fixRegionAndAccesoryViews];
         if (_swipeView.image &&  !CGSizeEqualToSize(prevSize, _swipeOverlay.bounds.size)) {
             //refresh safeInsets in situations like layout change, orientation change, table resize, etc.
@@ -813,7 +813,7 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
 {
     UIEdgeInsets safeInsets = [self getSafeInsets];
     if (!_swipeOverlay) {
-        _swipeOverlay = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.contentView.bounds.size.height)];
+        _swipeOverlay = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.swipeOverlayContainerView.frame.size.width, self.swipeOverlayContainerView.bounds.size.height)];
         [self fixRegionAndAccesoryViews];
         _swipeOverlay.hidden = YES;
         _swipeOverlay.backgroundColor = [self backgroundColorForSwipe];
@@ -823,7 +823,7 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
         _swipeView.contentMode = UIViewContentModeCenter;
         _swipeView.clipsToBounds = YES;
         [_swipeOverlay addSubview:_swipeView];
-        [self.contentView addSubview:_swipeOverlay];
+        [self.swipeOverlayContainerView addSubview:_swipeOverlay];
     }
     
     [self fetchButtonsIfNeeded];
@@ -877,8 +877,8 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
     }
     
     // snapshot cell without separator
-    CGSize  cropSize        = CGSizeMake(self.bounds.size.width, self.contentView.bounds.size.height);
-    _swipeView.image = [self imageFromView:self cropSize:cropSize];
+    CGSize  cropSize        = CGSizeMake(self.swipeOverlayContainerView.bounds.size.width, self.swipeOverlayContainerView.bounds.size.height);
+    _swipeView.image = [self imageFromView:self.swipeOverlayContainerView cropSize:cropSize];
     
     _swipeOverlay.hidden = NO;
     if (_swipeContentView)
@@ -915,7 +915,7 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
     _swipeView.image = nil;
     if (_swipeContentView) {
         [_swipeContentView removeFromSuperview];
-        [self.contentView addSubview:_swipeContentView];
+        [self.swipeOverlayContainerView addSubview:_swipeContentView];
     }
     
     if (_tableInputOverlay) {
@@ -1054,13 +1054,13 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
     if (self.accessoryView) {
         self.accessoryView.hidden = hidden;
     }
-    for (UIView * view in self.contentView.superview.subviews) {
-        if (view != self.contentView && ([view isKindOfClass:[UIButton class]] || [NSStringFromClass(view.class) rangeOfString:@"Disclosure"].location != NSNotFound)) {
+    for (UIView * view in self.swipeOverlayContainerView.superview.subviews) {
+        if (view != self.swipeOverlayContainerView && ([view isKindOfClass:[UIButton class]] || [NSStringFromClass(view.class) rangeOfString:@"Disclosure"].location != NSNotFound)) {
             view.hidden = hidden;
         }
     }
     
-    for (UIView * view in self.contentView.subviews) {
+    for (UIView * view in self.swipeOverlayContainerView.subviews) {
         if (view == _swipeOverlay || view == _swipeContentView) continue;
         if (hidden && !view.hidden) {
             view.hidden = YES;
@@ -1081,8 +1081,8 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
     if (_swipeBackgroundColor) {
         return _swipeBackgroundColor; //user defined color
     }
-    else if (self.contentView.backgroundColor && ![self.contentView.backgroundColor isEqual:[UIColor clearColor]]) {
-        return self.contentView.backgroundColor;
+    else if (self.swipeOverlayContainerView.backgroundColor && ![self.swipeOverlayContainerView.backgroundColor isEqual:[UIColor clearColor]]) {
+        return self.swipeOverlayContainerView.backgroundColor;
     }
     else if (self.backgroundColor) {
         return self.backgroundColor;
@@ -1100,6 +1100,10 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
         view = view.superview;
     }
     return nil;
+}
+    
+- (UIView *)swipeOverlayContainerView {
+    return self.contentView;
 }
 
 -(void) updateState: (MGSwipeState) newState;
@@ -1176,7 +1180,7 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
         bool expand = expansions[i].buttonIndex >= 0 && offset > view.bounds.size.width * expansions[i].threshold;
         if (expand) {
             [view expandToOffset:offset settings:expansions[i]];
-            _targetOffset = expansions[i].fillOnTrigger ? self.bounds.size.width * sign : 0;
+            _targetOffset = expansions[i].fillOnTrigger ? self.swipeOverlayContainerView.bounds.size.width * sign : 0;
             _activeExpansion = view;
             [self updateState:i ? MGSwipeStateExpandingRightToLeft : MGSwipeStateExpandingLeftToRight];
         }
@@ -1506,7 +1510,7 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
 }
 
 - (id)accessibilityElementAtIndex:(NSInteger)index {
-    return _swipeOffset == 0  ? [super accessibilityElementAtIndex:index] : self.contentView;
+    return _swipeOffset == 0  ? [super accessibilityElementAtIndex:index] : self.swipeOverlayContainerView;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {

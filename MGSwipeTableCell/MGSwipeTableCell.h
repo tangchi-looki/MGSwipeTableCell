@@ -223,7 +223,8 @@ typedef NS_ENUM(NSInteger, MGSwipeEasingFunction) {
 /** optional to use contentView alternative. Use this property instead of contentView to support animated views while swiping */
 @property (nonatomic, strong, readonly, nonnull) UIView * swipeContentView;
 
-/** 
+- (UIView *)swipeOverlayContainerView;
+/**
  * Left and right swipe buttons and its settings.
  * Buttons can be any kind of UIView but it's recommended to use the convenience MGSwipeButton class
  */
